@@ -41,10 +41,10 @@ cInit = min(zData);
 % Set up fittype and options.
 opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
 opts.Display = 'Off';
-
-    ft = fittype( 'c+A*exp(-2*((x-x0)/wx)^2)*exp(-2*((y-y0)/wy)^2)', 'independent', {'x', 'y'}, 'dependent', 'z' );
-    opts.StartPoint = [aInit cInit 20 20 x0Init(1) y0Init(1)];
-
+ft = fittype( 'c+A*exp(-2*((x-x0)/wx)^2)*exp(-2*((y-y0)/wy)^2)', 'independent', {'x', 'y'}, 'dependent', 'z' );
+opts.StartPoint = [aInit cInit 20 20 x0Init(1) y0Init(1)];
+opts.Lower = [0 0 0 0 1 1];
+opts.upper = [1 1 size(data,2) size(data,1) size(data,2), size(data,1)];
 % Fit model to data.
 [fitresult, gof] = fit( [xData, yData], zData, ft, opts );
 

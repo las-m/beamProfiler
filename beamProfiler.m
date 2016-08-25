@@ -22,7 +22,7 @@ function varargout = beamProfiler(varargin)
 
 % Edit the above text to modify the response to help beamProfiler
 
-% Last Modified by GUIDE v2.5 24-Aug-2016 17:51:11
+% Last Modified by GUIDE v2.5 25-Aug-2016 09:41:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -53,30 +53,21 @@ function beamProfiler_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to beamProfiler (see VARARGIN)
 
 
-% Access an image acquisition device.
-vidobj = videoinput('pointgrey', 1, 'Mono8_1280x960');
+dev_inf = imaqhwinfo('pointgrey');
+cam_names = {dev_inf.DeviceInfo.DeviceName};
 
-% Convert the input images to grayscale.
-vidobj.ReturnedColorSpace = 'grayscale';
+for i = 1:numel(dev_inf.DeviceIDs)
+    vidobj = videoinput('pointgrey', dev_inf.DeviceIDs{i}, 'Mono8_1280x960');
+    src = getselectedsource(vidobj);
+    serial_num{i} = src.SerialNumber;
+end
 
-% Retrieve the video resolution.
-vidRes = vidobj.VideoResolution;
+cam_list = [dev_inf.DeviceIDs', cam_names', serial_num'];
 
-% The Video Resolution property returns values as width by height, but
-% MATLAB images are height by width, so flip the values.
-imageRes = fliplr(vidRes);
-axes(handles.image);
-hImage = imagesc(zeros(imageRes));
-axis image;
+set(handles.tabcamList, 'Data', cam_list);
 
-setappdata(hImage,'UpdatePreviewWindowFcn',@update_gaussian_fit);
-
-handles.hImage = hImage;
-handles.vidobj = vidobj;
-
-handles.ROIpos = [500, 500, 200, 200];
-h = imrect(handles.image, handles.ROIpos);
-addNewPositionCallback(h,@(ROIpos) setROI(hObject, eventdata, handles, ROIpos));
+evdata = struct('Indices',[1 1]);
+tabcamList_CellSelectionCallback(handles.tabcamList,evdata,handles);
 
 % Choose default command line output for beamProfiler
 handles.output = hObject;
@@ -105,10 +96,10 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-stoppreview(handles.vidobj);
-
-delete(handles.vidobj)
-
+if isfield(handles, 'vidobj')
+    stoppreview(handles.vidobj);
+    delete(handles.vidobj)
+end
 % Hint: delete(hObject) closes the figure
 delete(hObject);
 
@@ -119,26 +110,27 @@ function pbPrev_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 button_state = get(hObject,'Value');
-if button_state
-    % toggle button is pressed
-    preview(handles.vidobj, handles.hImage);
+
+if isfield(handles, 'vidobj')
+    if button_state
+        % toggle button is pressed
+        preview(handles.vidobj, handles.hImage);
+    else
+        % toggle button is not pressed
+        stoppreview(handles.vidobj);
+    end
 else
-    % toggle button is not pressed
-    stoppreview(handles.vidobj);
+    set(hObject, 'Value', 0);
+    warndlg('Select Camera first!');
 end
-
-
-% --- Executes on button press in pbSelROI.
-function pbSelROI_Callback(hObject, eventdata, handles)
-% hObject    handle to pbSelROI (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+    
 
 function setROI(hObject, eventdata, handles, ROIpos)
+stoppreview(handles.vidobj);
 handles.ROIpos = ROIpos;
 guidata(hObject, handles);
 set(handles.txtInfo, 'String', ['ROI: ' mat2str(ROIpos,3)]);
+preview(handles.vidobj, handles.hImage);
 
 
 % --- Executes on button press in pbDF.
@@ -155,3 +147,39 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of pushbutton5
+
+
+% --- Executes when selected cell(s) is changed in tabcamList.
+function tabcamList_CellSelectionCallback(hObject, eventdata, handles)
+% hObject    handle to tabcamList (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.TABLE)
+%	Indices: row and column indices of the cell(s) currently selecteds
+% handles    structure with handles and user data (see GUIDATA)
+row = eventdata.Indices;
+
+% Access an image acquisition device.
+vidobj = videoinput('pointgrey', hObject.Data{row(1), 1}, 'Mono8_1280x960');
+
+% % Convert the input images to grayscale.
+vidobj.ReturnedColorSpace = 'grayscale';
+
+% Retrieve the video resolution.
+vidRes = vidobj.VideoResolution;
+
+% The Video Resolution property returns values as width by height, but
+% MATLAB images are height by width, so flip the values.
+imageRes = fliplr(vidRes);
+axes(handles.image);
+hImage = imagesc(double(zeros(imageRes)+1));
+axis image;
+colormap(gca, parula);
+setappdata(hImage,'UpdatePreviewWindowFcn',@update_gaussian_fit);
+
+handles.hImage = hImage;
+handles.vidobj = vidobj;
+
+handles.ROIpos = [500, 500, 200, 200];
+h = imrect(handles.image, handles.ROIpos);
+addNewPositionCallback(h,@(ROIpos) setROI(hObject, eventdata, handles, ROIpos));
+
+guidata(hObject, handles);
