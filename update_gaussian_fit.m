@@ -2,7 +2,6 @@ function update_gaussian_fit(obj,event,hImage)
 % This callback function updates the gaussian fit.
 
 d = double(event.Data) + 1;
-d = d/max(d(:));
 
 % Display the current image frame. 
 set(hImage, 'CData', d);
@@ -11,6 +10,10 @@ handles = guidata(fig);
 ROIpos = round(handles.ROIpos);
 axes(handles.ROI);
 colormap(gca, parula);
+
+
+
+d = d/max(d(:));
 
 crop = d(ROIpos(2):ROIpos(2)+ROIpos(4),ROIpos(1):ROIpos(1)+ROIpos(3));
 % crop = crop/max(crop(:));
@@ -21,6 +24,7 @@ if get(handles.pbDF, 'Value')
     axes(handles.axFR);
     plot(fr); 
     colormap(gca, parula);
+    shading interp;
     set(handles.axFR, 'Visible', 'Off');
     set(handles.txtInfo, 'String', {['wx = ' num2str(fr.wx)]; ['wy = ' num2str(fr.wx)]});
 end

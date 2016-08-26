@@ -22,7 +22,7 @@ function varargout = beamProfiler(varargin)
 
 % Edit the above text to modify the response to help beamProfiler
 
-% Last Modified by GUIDE v2.5 25-Aug-2016 09:41:48
+% Last Modified by GUIDE v2.5 26-Aug-2016 14:11:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -166,13 +166,14 @@ vidobj.ReturnedColorSpace = 'grayscale';
 % Retrieve the video resolution.
 vidRes = vidobj.VideoResolution;
 
+handles.src = getselectedsource(vidobj);
+
 % The Video Resolution property returns values as width by height, but
 % MATLAB images are height by width, so flip the values.
 imageRes = fliplr(vidRes);
 axes(handles.image);
-hImage = imagesc(double(zeros(imageRes)+1));
+hImage = imagesc(zeros(imageRes));
 axis image;
-colormap(gca, parula);
 setappdata(hImage,'UpdatePreviewWindowFcn',@update_gaussian_fit);
 
 handles.hImage = hImage;
@@ -183,3 +184,79 @@ h = imrect(handles.image, handles.ROIpos);
 addNewPositionCallback(h,@(ROIpos) setROI(hObject, eventdata, handles, ROIpos));
 
 guidata(hObject, handles);
+
+
+% --- Executes on button press in cbShutterAuto.
+function cbShutterAuto_Callback(hObject, eventdata, handles)
+% hObject    handle to cbShutterAuto (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cbShutterAuto
+if get(hObject,'Value')
+    set(handles.src, 'ShutterMode', 'Auto');
+else
+    set(handles.src, 'ShutterMode', 'Manual');
+    set(handles.src, 'Shutter', str2double(get(handles.edtShutterTime, 'String')));
+end
+
+
+function edtShutterTime_Callback(hObject, eventdata, handles)
+% hObject    handle to edtShutterTime (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edtShutterTime as text
+%        str2double(get(hObject,'String')) returns contents of edtShutterTime as a double
+set(handles.src, 'Shutter', str2double(get(handles.edtShutterTime, 'String')));
+
+% --- Executes during object creation, after setting all properties.
+function edtShutterTime_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edtShutterTime (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in cbGainAuto.
+function cbGainAuto_Callback(hObject, eventdata, handles)
+% hObject    handle to cbGainAuto (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cbGainAuto
+if get(hObject,'Value')
+    set(handles.src, 'GainMode', 'Auto');
+else
+    set(handles.src, 'GainMode', 'Manual');
+    set(handles.src, 'Gain', str2double(get(handles.edtShutterTime, 'String')));
+end
+
+
+
+function edtGain_Callback(hObject, eventdata, handles)
+% hObject    handle to edtGain (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edtGain as text
+%        str2double(get(hObject,'String')) returns contents of edtGain as a double
+set(handles.src, 'Gain', str2double(get(handles.edtShutterTime, 'String')));
+
+
+% --- Executes during object creation, after setting all properties.
+function edtGain_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edtGain (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
