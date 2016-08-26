@@ -27,6 +27,10 @@ if get(handles.pbDF, 'Value')
     shading interp;
     set(handles.axFR, 'Visible', 'Off');
     set(handles.txtInfo, 'String', {['wx = ' num2str(fr.wx)]; ['wy = ' num2str(fr.wx)]});
+    axes(handles.axFRt);
+    [xdata, ~] = getpoints(handles.line1);
+    addpoints(handles.line1, xdata(end) + 1, fr.wx); 
+    addpoints(handles.line2, xdata(end) + 1, fr.wy); 
 end
 
 % Refresh the display.

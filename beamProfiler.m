@@ -68,6 +68,11 @@ set(handles.tabcamList, 'Data', cam_list);
 
 evdata = struct('Indices',[1 1]);
 tabcamList_CellSelectionCallback(handles.tabcamList,evdata,handles);
+axes(handles.axFRt);
+handles.line1 = animatedline('Color', [0 .7 .7]);
+addpoints(handles.line1, 0, 0);
+handles.line2 = animatedline('Color', [.7 .7 0]);
+addpoints(handles.line2, 0, 0);
 
 % Choose default command line output for beamProfiler
 handles.output = hObject;
