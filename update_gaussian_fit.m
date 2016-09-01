@@ -11,13 +11,13 @@ ROIpos = round(handles.ROIpos);
 axes(handles.ROI);
 colormap(gca, parula);
 
-
-
 d = d/max(d(:));
 
 crop = d(ROIpos(2):ROIpos(2)+ROIpos(4),ROIpos(1):ROIpos(1)+ROIpos(3));
 % crop = crop/max(crop(:));
 imagesc(crop);
+set(gca,'YTickLabel',[]);
+set(gca,'XTickLabel',[]);
 
 if get(handles.pbDF, 'Value')
     fr = fit2DGauss(crop);
@@ -33,5 +33,12 @@ if get(handles.pbDF, 'Value')
     addpoints(handles.line2, xdata(end) + 1, fr.wy); 
 end
 
+axes(handles.ROIx)
+plot(sum(crop,1));
+set(gca,'YTickLabel',[]);
+
+axes(handles.ROIy)
+plot(sum(crop,2)');
+set(gca,'XTickLabel',[]);
 % Refresh the display.
 drawnow
