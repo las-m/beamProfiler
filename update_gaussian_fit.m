@@ -11,7 +11,7 @@ ROIpos = round(handles.ROIpos);
 axes(handles.ROI);
 colormap(gca, parula);
 
-d = d/max(d(:));
+d = (d-min(d(:)))/(max(d(:))-min(d(:)));
 
 crop = d(ROIpos(2):ROIpos(2)+ROIpos(4),ROIpos(1):ROIpos(1)+ROIpos(3));
 % crop = crop/max(crop(:));
@@ -20,7 +20,7 @@ set(gca,'YTickLabel',[]);
 set(gca,'XTickLabel',[]);
 
 if get(handles.pbDF, 'Value')
-    fr = fit2DGauss(crop);
+    fr = fit21DGauss(crop);
     axes(handles.axFR);
     plot(fr); 
     colormap(gca, parula);
